@@ -2,6 +2,8 @@ from uuid import UUID
 from django.db import models
 from core import models as core_models
 from report.services import run_stored_proc_report
+from claim.models import Claim
+
 
 def claim_history_query():
     data = run_stored_proc_report(
@@ -12,13 +14,13 @@ def claim_history_query():
     }
 
 
-def services_performance_query(date_from=None,date_to=None):
+def services_performance_query(date_from=None, date_to=None):
     queryset = ()
 
     return {"data": list(queryset)}
 
 
-def insuree_without_photo_query(date_from=None,date_to=None):
+def insuree_without_photo_query(date_from=None, date_to=None):
     queryset = ()
 
     return {"data": list(queryset)}
@@ -30,11 +32,13 @@ def submitted_claim_query():
         "data": data
     }
 
+
 def health_facilities_query():
     data = run_stored_proc_report()
     return {
         "data": data
     }
+
 
 def feedback_indicators_query():
     data = run_stored_proc_report()
@@ -42,11 +46,13 @@ def feedback_indicators_query():
         "data": data
     }
 
+
 def upload_enrolement_from_phone_query():
     data = run_stored_proc_report()
     return {
         "data": data
     }
+
 
 def enrolement_officers_query():
     data = run_stored_proc_report()
@@ -54,11 +60,13 @@ def enrolement_officers_query():
         "data": data
     }
 
+
 def user_log_report_query():
     data = run_stored_proc_report()
     return {
         "data": data
     }
+
 
 def expired_policies_query():
     data = run_stored_proc_report()
@@ -66,3 +74,9 @@ def expired_policies_query():
         "data": data
     }
 
+
+def cs_report_cpn1_realisation(date_from, date_to, **kwargs):
+    if date_from:
+        queryset = (
+            Claim.objects.filter(validity_from__gte=date_from, validity_to__gte=date_to, count__code='CPN1').Count())
+    return {"data": list(queryset)}

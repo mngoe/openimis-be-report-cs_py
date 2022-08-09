@@ -2,7 +2,7 @@ from uuid import UUID
 from django.db import models
 from core import models as core_models
 from report.services import run_stored_proc_report
-from claim.models import Claim
+
 
 
 def claim_history_query():
@@ -75,8 +75,3 @@ def expired_policies_query():
     }
 
 
-def cs_report_cpn1_realisation(date_from, date_to, **kwargs):
-    if date_from:
-        queryset = (
-            Claim.objects.filter(validity_from__gte=date_from, validity_to__gte=date_to, count__code='CPN1').Count())
-    return {"data": list(queryset)}

@@ -1,162 +1,79 @@
 from django.db import models
 from core import models as core_models
 from report.services import run_stored_proc_report
+from claim.models import Claim
 
-
-
-def claim_history_query():
-def sales_objectives_rate_query():
-    data = run_stored_proc_report(
-    )
-    return {
-        "data": data
-    }
-
-
-
-def services_performance_query(date_from=None, date_to=None):
-
-def pregnant_woman_with_cs_query(date_from=None,date_to=None):
-    queryset = ()
-
+def cpn1_with_cs_query(date_from=None, date_to=None, **kwargs):
+    if date_from:
+        queryset = (
+            Claim.objects.filter(validity_from__gte=date_from, validity_to__gte=date_to, count__code='CPN1').Count())
     return {"data": list(queryset)}
 
-
-
-def insuree_without_photo_query(date_from=None, date_to=None):
-
-def cpn1_with_cs_query(date_from=None,date_to=None):
+def cpn4_with_cs_query(date_from=None, date_to=None, **kwargs):
     queryset = ()
-
     return {"data": list(queryset)}
 
+def assisted_birth_with_cs_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def assisted_birth_with_cs_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
+def mother_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
+def newborn_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def health_facilities_query():
+def complicated_birth_with_cs_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def mother_cpon_with_cs_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
+def cesarienne_rate_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
+def pregnant_woman_ref_rate_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def feedback_indicators_query():
+def invoice_per_fosa_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def newborn_cpon_with_cs_query():
+def expired_policies_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
+def periodic_paid_bills_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
+def periodic_rejected_bills_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def upload_enrolement_from_phone_query():
+def periodic_household_participation_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def complicated_birth_with_cs_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
+def cs_sales_amount_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
+def new_cs_per_month_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def enrolement_officers_query():
+def cs_in_use_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-def cesarienne_rate_query():
+def closed_cs_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-
-
-def user_log_report_query():
-
-def pregnant_woman_ref_rate_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def user_log_report_query(user,date_from=None, date_to=None,action=None):
-    data = run_stored_proc_report(
-        "uspSSRSUserLogReport",
-        FromDate = date_from,
-        ToDate  = date_to,
-        Action = action,
-    )
-    return {
-        "data": data
-    }
-
-def invoice_per_fosa_query():
-
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-
-def expired_policies_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-
-def periodic_paid_bills_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def periodic_rejected_bills_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def periodic_household_participation_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def cs_sales_amount_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def new_cs_per_month_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def cs_in_use_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def closed_cs_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
-def medium_charge_on_beneficiary_query():
-    data = run_stored_proc_report()
-    return {
-        "data": data
-    }
-
+def severe_malaria_cost_query(date_from=None, date_to=None, **kwargs):
+    queryset = ()
+    return {"data": list(queryset)}
 

@@ -4,6 +4,19 @@ from report.services import run_stored_proc_report
 from claim.models import Claim
 
 
+def sales_objectives_rate_query():
+    data = run_stored_proc_report(
+    )
+    return {
+        "data": data
+    }
+
+
+def pregnant_woman_with_cs_query(date_from=None, date_to=None):
+    queryset = ()
+    return {"data": list(queryset)}
+
+
 def cpn1_with_cs_query(date_from=None, date_to=None, **kwargs):
     if date_from:
         queryset = (

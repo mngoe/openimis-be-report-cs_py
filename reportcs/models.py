@@ -1,7 +1,7 @@
 from django.db import models
 from core import models as core_models
 from report.services import run_stored_proc_report
-from claim.models import Claim, ClaimService, ClaimItem, ClaimServiceService
+from claim.models import Claim, ClaimService, ClaimItem, ClaimService
 from location.models import Location, HealthFacility
 from collections import defaultdict
 
@@ -30,80 +30,50 @@ def invoice_cs_query(user, **kwargs):
         )
     
     print("Claim")
+   
     invoiceElemtList = defaultdict(dict)
-    invoiceElemtTotal = {}
-    invoiceElemtTotal["QtyTotal"] = 0
-    invoiceElemtTotal["MontantRecueTotal"] = 0
     for cclaim in claimList:
         claimService = ClaimService.objects.filter(
             claim = cclaim
         )
         for claimServiceElmt in claimService:
-            
             if claimServiceElmt.service.id not in invoiceElemtList[claimServiceElmt.service.packagetype]:
                 invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id] = defaultdict(dict)
-                invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = 0
-                #invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = 0
-            
             invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["name"] = claimServiceElmt.service.name
             invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["code"] = claimServiceElmt.service.code
             invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["tarif"] = claimServiceElmt.price_asked
-            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] += claimServiceElmt.qty_provided
-            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"] = invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] * invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["tarif"]
-            invoiceElemtTotal["QtyTotal"] += claimServiceElmt.qty_provided
-            invoiceElemtTotal["MontantRecueTotal"] += invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"]
+            # reports elements 
+            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["PriceAsked"]  = claimServiceElmt.service.asked
+            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["QtyProvided"] = claimServiceElmt.service.provided
+            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["QtyApproved"] = claimServiceElmt.service.approved
+            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["PriceApproved"] = claimServiceElmt.service.price_approved
+            invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["PriceValuated"] = claimServiceElmt.service.price_valuated
+
             claimServices = ClaimServiceService.objects.filter(
                 claimlinkedService = claimServiceElmt
             )
             for claimService in claimServices:
-                print(claimServiceElmt.service.id)
-                #invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = 0
-                ##if type(invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"]) is not dict :
-                #    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] += claimService.qty_displayed
-                #else :
-                #    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = claimService.qty_displayed
-            claimService = ClaimService.objects.filter(
-            claim = cclaim
-        )
-        claimItem = ClaimItem.objects.filter(
-            claim = cclaim
-        )
-        for claimItemElmt in claimItem:
-            
-            if claimItemElmt.service.id not in invoiceElemtList[claimItemElmt.service.packagetype]:
-                invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id] = defaultdict(dict)
-                invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["qty"] = 0
-                #invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = 0
-            
-            invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["name"] = claimItemElmt.service.name
-            invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["code"] = claimItemElmt.service.code
-            invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["tarif"] = claimItemElmt.price_asked
-            invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["qty"] += claimItemElmt.qty_provided
-            invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["MontantRecue"] = invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["qty"] * invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["tarif"]            
-            invoiceElemtTotal["QtyTotal"] += claimItemElmt.qty_provided
-            invoiceElemtTotal["MontantRecueTotal"] += invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id]["MontantRecue"]
+                if type(invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"]) is not dict :
+                    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = claimService.qty_displayed
+                else :
+                    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"] = claimService.qty_displayed
             
 
-    print ("{:<5} {:<5} {:<30} {:<10} {:<10} {:<10} {:<10}".format('type','id','name','Code','tarif','qty', 'Montant Recus'))
+
+    print ("{:<5} {:<5} {:<20} {:<10} {:<10} {:<10}".format('type','id','name','Code','tarif','qty'))
     for typeList,v in invoiceElemtList.items():
         for id in  v:
-            print("{:<5} {:<5} {:<30} {:<10} {:<10} {:<10} {:<10}".format(
-                typeList, id, v[id]['name'], v[id]['code'], v[id]['tarif'],v[id]['qty'], v[id]['MontantRecue']
-                ))
-    invoiceElemtTotal["QtyTotal"] = "{:,.0f}".format(invoiceElemtTotal["QtyTotal"])
-    invoiceElemtTotal["MontantRecueTotal"] =  "{:,.0f}".format(invoiceElemtTotal["MontantRecueTotal"])
-    print(invoiceElemtTotal)     
+            print("{:<5} {:<5} {:<20} {:<10} {:<10}".format(typeList, id, v[id]['name'], v[id]['code'],))
+            print(v[id]['qty'])
+            
     print(invoiceElemtList)
 
-    
-
     dictBase =  {
-        "prestationForfaitaire": invoiceElemtList,
-        "invoiceElemtTotal" : invoiceElemtTotal,
+        "data": str(invoiceElemtList),
         "dateFrom": date_from_str,
         "dateTo": date_to_str
         }
-    print(dictBase)
+    #print(dictBase)
 
     if location0:
         location0_str = Location.objects.filter(
@@ -111,6 +81,7 @@ def invoice_cs_query(user, **kwargs):
             validity_to__isnull=True
             ).first().name
         dictBase["region"] = location0_str
+    #print(location0)
 
     if location1:
         location1_str = Location.objects.filter(
@@ -118,6 +89,7 @@ def invoice_cs_query(user, **kwargs):
             validity_to__isnull=True
             ).first().name
         dictBase["district"] =location1_str
+    #print(location1)
     
     if location2:
         location2_str = Location.objects.filter(

@@ -525,8 +525,7 @@ def closed_cs_query(user, **kwargs):
             validity_to__isnull=True
             ).first()
         dictBase["fosa"] = hflocationObj.name
-        
-    print(dictBase)
+
     return dictBase
 
 

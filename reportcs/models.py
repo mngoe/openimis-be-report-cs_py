@@ -5,6 +5,7 @@ from medical.models import Item, Service
 from report.services import run_stored_proc_report
 from claim.models import Claim, ClaimService, ClaimItem, ClaimServiceService, ClaimServiceItem
 from location.models import Location, HealthFacility
+from  insuree.models import Insuree
 from collections import defaultdict
 from django.db.models import Count
 import json
@@ -305,24 +306,30 @@ def cpn4_with_cs_query(user, **kwargs):
 
     date_from_object = datetime.datetime.strptime(date_from, format)
     date_from_str = date_from_object.strftime("%d/%m/%Y")
+
     date_to_object = datetime.datetime.strptime(date_to, format)
     date_to_str = date_to_object.strftime("%d/%m/%Y")
 
-    queryset = Claim.objects.filter(
+    femmes = Insuree.objects.filter(
         validity_from__gte=date_from,
         validity_to__gte=date_to,
-        code='CPN4'
-        ).count()
-    return {
-        "data": str(queryset),
+         gender = 2
+    ).count()
+    dictBase = {
+        "post": str(femmes),
         "dateFrom": date_from_str,
         "dateTo": date_to_str,
-        "region": location0,
-        "district": location1,
-        "area": location2,
         "fosa": hflocation
         }
+    if hflocation:
+        hflocation_str = HealthFacility.objects.filter(
+            code=hflocation,
+            validity_to__isnull=True
+            ).first().name
+        dictBase["fosa"] = hflocation_str
 
+    print(dictBase)
+    return dictBase
 def assisted_birth_with_cs_query(date_from=None, date_to=None, **kwargs):
     queryset = ()
     return {"data": list(queryset)}
@@ -347,9 +354,44 @@ def pregnant_woman_ref_rate_query(date_from=None, date_to=None, **kwargs):
     queryset = ()
     return {"data": list(queryset)}
 
-def invoice_per_fosa_query(date_from=None, date_to=None, **kwargs):
-    queryset = ()
-    return {"data": list(queryset)}
+def invoice_per_fosa_query(user, **kwargs):
+    date_from = kwargs.get("date_from")
+    date_to = kwargs.get("date_to")
+    hflocation = kwargs.get("hflocation")
+
+    format = "%Y-%m-%d"
+
+    date_from_object = datetime.datetime.strptime(date_from, format)
+    date_from_str = date_from_object.strftime("%d/%m/%Y")
+
+    date_to_object = datetime.datetime.strptime(date_to, format)
+    date_to_str = date_to_object.strftime("%d/%m/%Y")
+
+    total = Claim.objects.filter(
+        date_from__gte=date_from,
+        date_from__lte=date_to
+    )
+    for status in total:
+        claim1 = ClaimItem.objects.filter(
+            status = 1
+    ).count()
+    for status in total:
+        claim2 = ClaimItem.objects.filter(
+            status= 16
+        ).count()
+    dictBase = {
+        "dateFrom": date_from_str,
+        "dateTo": date_to_str,
+        "fosa": hflocation,
+        "post": str(claim1+claim2)
+    }
+    if hflocation:
+        hflocation_str = HealthFacility.objects.filter(
+            code=hflocation,
+            validity_to__isnull=True
+            ).first().name
+        dictBase["fosa"] = hflocation_str
+    return dictBase
 
 def expired_policies_query(date_from=None, date_to=None, **kwargs):
     queryset = ()
@@ -409,8 +451,6 @@ def periodic_rejected_bills_query(user, **kwargs):
     date_to_object = datetime.datetime.strptime(date_to, format)
     date_to_str = date_to_object.strftime("%d/%m/%Y")
 
-   
-
     queryset = Claim.objects.filter(
         date_from__gte=date_from,
         date_from__lte=date_to
@@ -425,12 +465,6 @@ def periodic_rejected_bills_query(user, **kwargs):
         "fosa": hflocation,
         "post": str(claimItem)
         }
-    if hflocation and hflocation!="0" :
-        hflocationObj = HealthFacility.objects.filter(
-            code=hflocation,
-            validity_to__isnull=True
-            ).first()
-        dictBase["fosa"] = hflocationObj.name
     return dictBase
 def periodic_household_participation_query(date_from=None, date_to=None, **kwargs):
     queryset = ()

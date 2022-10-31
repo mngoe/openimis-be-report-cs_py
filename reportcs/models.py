@@ -8,6 +8,7 @@ from location.models import Location, HealthFacility
 from  insuree.models import Insuree
 from collections import defaultdict
 from django.db.models import Count
+from django.db.models import F
 import json
 import datetime
 
@@ -313,8 +314,10 @@ def cpn4_with_cs_query(user, **kwargs):
     femmes = Insuree.objects.filter(
         validity_from__gte=date_from,
         validity_to__gte=date_to,
-         gender = 2
+        
     ).count()
+
+
     dictBase = {
         "post": str(femmes),
         "dateFrom": date_from_str,

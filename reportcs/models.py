@@ -328,9 +328,38 @@ def assisted_birth_with_cs_query(date_from=None, date_to=None, **kwargs):
     queryset = ()
     return {"data": list(queryset)}
 
-def mother_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):
-    queryset = ()
-    return {"data": list(queryset)}
+def mother_cpon_with_cs_query(user, **kwargs):
+    date_from = kwargs.get("date_from")
+    date_to = kwargs.get("date_to")
+    hflocation = kwargs.get("hflocation")
+
+    format = "%Y-%m-%d"
+
+    date_from_object = datetime.datetime.strptime(date_from, format)
+    date_from_str = date_from_object.strftime("%d/%m/%Y")
+
+    date_to_object = datetime.datetime.strptime(date_to, format)
+    date_to_str = date_to_object.strftime("%d/%m/%Y")
+
+    mother = Service.objects.filter(
+        validity_from__gte = date_from,
+        validity_to__gte = date_to,
+        code = 'F8'
+    ).count()
+
+    dictBase = {
+        "dateFrom": date_from_str,
+        "dateTo": date_to_str,
+        "post": str(mother)
+        
+    }
+    if hflocation and hflocation !="0":
+        hflocationObj = HealthFacility.objects.filter(
+            code = hflocation,
+            validity_to__isnull = True
+            ).first()
+        dictBase["fosa"] = hflocationObj.name
+    return dictBase
 
 def newborn_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):
     queryset = ()

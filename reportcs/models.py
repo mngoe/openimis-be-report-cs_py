@@ -478,9 +478,47 @@ def new_cs_per_month_query(date_from=None, date_to=None, **kwargs):
     queryset = ()
     return {"data": list(queryset)}
 
-def cs_in_use_query(date_from=None, date_to=None, **kwargs):
-    queryset = ()
-    return {"data": list(queryset)}
+def closed_cs_query(user, **kwargs):
+
+    date_from = kwargs.get("date_from")
+    date_to = kwargs.get("date_to")
+    location0 = kwargs.get("location0")
+    location1 = kwargs.get("location1")
+    location2 = kwargs.get("location2")
+    hflocation = kwargs.get("hflocation")
+
+    format = "%Y-%m-%d"
+
+    date_from_object = datetime.datetime.strptime(date_from, format)
+    date_from_str = date_from_object.strftime("%d/%m/%Y")
+
+    date_to_object = datetime.datetime.strptime(date_to, format)
+    date_to_str = date_to_object.strftime("%d/%m/%Y")
+
+    cloturer = Policy.objects.filter(
+        # date_from__gte = date_from,
+        # date_from__lte = date_to
+    )
+    for status in cloturer:
+        policy = Policy.objects.filter(
+            status= 16
+        ).count()
+
+    dictBase =  {
+        "dateFrom": date_from_str,
+        "dateTo": date_to_str,
+        "fosa": hflocation,
+        "post": str(policy)
+        }
+
+    if hflocation and hflocation!="0" :
+        hflocationObj = HealthFacility.objects.filter(
+            code=hflocation,
+            validity_to__isnull=True
+            ).first()
+        dictBase["fosa"] = hflocationObj.name
+    print (dictBase)
+    return dictBase
 
 def closed_cs_query(user, **kwargs):
     date_from = kwargs.get("date_from")

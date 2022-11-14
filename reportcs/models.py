@@ -322,12 +322,12 @@ def cpn4_with_cs_query(user, **kwargs):
         dictBase["fosa"] = hflocationObj.name
 
         claimItem = Service.objects.filter(
-            # validity_from__gte = date_from,
-            # validity_to__lte = date_to,
+            validity_from__gte = date_from,
+            validity_to__lte = date_to,
             **dictGeo,
         code = 'F4'
         ).count()
-        print(claimItem)
+
         dictGeo['health_facility'] = hflocationObj.id
         dictBase["post"]= str(claimItem)
     return dictBase

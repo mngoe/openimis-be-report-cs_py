@@ -341,24 +341,29 @@ def mother_cpon_with_cs_query(user, **kwargs):
     date_to_object = datetime.datetime.strptime(date_to, format)
     date_to_str = date_to_object.strftime("%d/%m/%Y")
 
-    mother = Service.objects.filter(
-        validity_from__gte = date_from,
-        validity_to__gte = date_to,
-        code = 'F8'
-    ).count()
-
+    
     dictBase = {
         "dateFrom": date_from_str,
         "dateTo": date_to_str,
-        "post": str(mother)
-        
-    }
-    if hflocation and hflocation !="0":
+        }
+    dictGeo = {}
+    if hflocation and hflocation!="0" :
         hflocationObj = HealthFacility.objects.filter(
-            code = hflocation,
-            validity_to__isnull = True
+            code=hflocation,
+            validity_to__isnull=True
             ).first()
         dictBase["fosa"] = hflocationObj.name
+
+        claimItem = Service.objects.filter(
+        validity_from__gte = date_from,
+        validity_to__lte = date_to,
+        **dictGeo,
+        code = 'F8'
+        ).count()
+        dictGeo['health_facility'] = hflocationObj.id
+        dictBase["post"]= str(claimItem)
+
+        print(claimItem)
     return dictBase
 
 def newborn_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):

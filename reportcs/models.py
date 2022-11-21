@@ -6,6 +6,8 @@ from report.services import run_stored_proc_report
 from claim.models import Claim, ClaimService, ClaimItem, ClaimServiceService, ClaimServiceItem
 from location.models import Location, HealthFacility
 from policy.models import Policy
+from insuree.models import Insuree
+from django.db.models import F
 from collections import defaultdict
 from django.db.models import Count
 import json
@@ -360,10 +362,30 @@ def mother_cpon_with_cs_query(user, **kwargs):
         **dictGeo,
         code = 'F8'
         ).count()
+
+        data = Service.objects.filter(code= 'F4').annotate(
+    insuree.Insuree__audit_user_id==F('insuree.Insuree__audit_user_id')
+)
+
+
+        if hflocation and hflocation!="0" :
+            TEST = Insuree.objects.filter(
+            
+        ).count()
+        
+        # test = Insuree.id = ClaimService.id
+
+        claimService = ClaimService.id
         dictGeo['health_facility'] = hflocationObj.id
         dictBase["post"]= str(claimItem)
 
-        print(claimItem)
+        # print(hflocationObj)
+        # print(TEST)
+        # print (test)
+        print(data)
+       
+
+        # print(claimItem)
     return dictBase
 
 def newborn_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):

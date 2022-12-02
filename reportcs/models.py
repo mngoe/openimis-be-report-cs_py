@@ -10,6 +10,7 @@ from insuree.models import Insuree
 from insuree.models import InsureePolicy
 from collections import defaultdict
 from django.db.models import Count
+from django.db.models import F
 import json
 import datetime
 
@@ -497,35 +498,21 @@ def cs_in_use_query(user, **kwargs):
         "dateFrom": date_from_str,
         "dateTo": date_to_str,
         }
-
     dict1 = {}
-    policy = (Policy.objects.values_list("id").filter(
+    policy = Policy.objects.values_list("id").filter(
           validity_from__gte = date_from,
           validity_to__lte = date_to,
-          status = 2)   
-    ).all()
-    dict1["policy_id"] = str( policy)
-   
-    list1=list(policy)
-    
-    # for list1 in InsureePolicy.objects.values_list():
-    #     print(list1.policy_id)
+          status = 2).count()
+    # list1 = list(policy)
+
     dict2 = {}
-    for id in dict1:
-        policyinsuree = InsureePolicy.objects.values_list('insuree_id').filter(   
-            policy_id =  policy, 
-    )    
+    policyinsuree = InsureePolicy.objects.values_list( 'policy_id', 'insuree_id'
+    ).filter(**dict1)       
     list2 = list(policyinsuree)
 
-    # list4 = list1[int(int(list2))]
-
-    # list4 = sorted(list1, key=list2.__getitem__)
-        
-    insuree = Insuree.objects.values_list('id', 'health_facility_id')
-
+    dict3= {}
+    insuree = Insuree.objects.values_list('id', 'health_facility').filter(**dict2)
     list3 = list(insuree)
-
-    
 
     dictGeo = {}
     if hflocation and hflocation!="0" :
@@ -535,13 +522,13 @@ def cs_in_use_query(user, **kwargs):
             ).first()
         dictBase["fosa"] = hflocationObj.name
         dictGeo['health_facility'] = hflocationObj.id
-
-        dictBase["post"] = str(list1)
-    print (dict1)
-    print(list1)
-    print(list2)
-    # print (list3) 
-    # print(list4)  
+        dictBase["post"]= str(policy)
+    
+       
+     
+    # print(list1)
+    # print(list2)
+    # print(list3)
     return dictBase
 def closed_cs_query(user, **kwargs):
     date_from = kwargs.get("date_from")

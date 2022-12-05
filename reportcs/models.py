@@ -499,11 +499,8 @@ def cs_in_use_query(user, **kwargs):
         "dateTo": date_to_str,
         }
     dict1 = {}
-    policy = Policy.objects.values_list("id").filter(
-          validity_from__gte = date_from,
-          validity_to__lte = date_to,
-          status = 2).count()
-    # list1 = list(policy)
+    policies = (Policy.objects.filter(status=2).filter(start_date__gte=date_from).filter(expiry_date__lte=date_to).count())   
+
 
     dict2 = {}
     policyinsuree = InsureePolicy.objects.values_list( 'policy_id', 'insuree_id'
@@ -511,7 +508,7 @@ def cs_in_use_query(user, **kwargs):
     list2 = list(policyinsuree)
 
     dict3= {}
-    insuree = Insuree.objects.values_list('id', 'health_facility').filter(**dict2)
+    insuree = Insuree.objects.values_list('id', 'health_facility_id').filter(**dict2)
     list3 = list(insuree)
 
     dictGeo = {}
@@ -522,10 +519,9 @@ def cs_in_use_query(user, **kwargs):
             ).first()
         dictBase["fosa"] = hflocationObj.name
         dictGeo['health_facility'] = hflocationObj.id
-        dictBase["post"]= str(policy)
+        dictBase["post"]= str(policies)
     
-       
-     
+    # print(policies)
     # print(list1)
     # print(list2)
     # print(list3)

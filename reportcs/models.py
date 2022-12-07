@@ -483,8 +483,6 @@ def cs_in_use_query(user, **kwargs):
     date_from = kwargs.get("date_from")
     date_to = kwargs.get("date_to")
     hflocation = kwargs.get("hflocation")
-    hfid = kwargs.get("hfid")
-    policy1 = kwargs.get("policy1")
     format = "%Y-%m-%d"
 
     date_from_object = datetime.datetime.strptime(date_from, format)
@@ -493,38 +491,47 @@ def cs_in_use_query(user, **kwargs):
     date_to_object = datetime.datetime.strptime(date_to, format)
     date_to_str = date_to_object.strftime("%d/%m/%Y")
 
-    dictBase = {}
     dictBase = {
         "dateFrom": date_from_str,
         "dateTo": date_to_str,
         }
-    dict1 = {}
-    policies = (Policy.objects.filter(status=2).filter(start_date__gte=date_from).filter(expiry_date__lte=date_to).count())   
-
-
-    dict2 = {}
-    policyinsuree = InsureePolicy.objects.values_list( 'policy_id', 'insuree_id'
-    ).filter(**dict1)       
-    list2 = list(policyinsuree)
-
-    dict3= {}
-    insuree = Insuree.objects.values_list('id', 'health_facility_id').filter(**dict2)
-    list3 = list(insuree)
 
     dictGeo = {}
-    if hflocation and hflocation!="0" :
-        hflocationObj = HealthFacility.objects.filter(
+    if  hflocation and hflocation !="0" :
+        hflocationObj = HealthFacility.objects.values_list('name',flat=True).filter(
             code=hflocation,
-            validity_to__isnull=True
-            ).first()
-        dictBase["fosa"] = hflocationObj.name
-        dictGeo['health_facility'] = hflocationObj.id
-        dictBase["post"]= str(policies)
+            ).first()   
+        dictBase["fosa"] = str(hflocationObj)
+        dictGeo['health_facility'] = hflocationObj
+
+    hf = HealthFacility.objects.values_list('id',flat=True).filter(
+            code=hflocation,
+            )
+    list5 = list(hf)
     
-    # print(policies)
-    # print(list1)
-    # print(list2)
-    # print(list3)
+
+    insuree = Insuree.objects.values_list('id', flat=True).filter(
+        health_facility_id__in = list5)
+    list3 = list(insuree)
+    
+
+    policy_insuree = InsureePolicy.objects.values_list('id', flat=True).filter(
+        policy_id__in = list3)
+    list2 = list(policy_insuree)
+
+    policy = Policy.objects.values_list('status', flat=True).filter(
+        id__in = list2,
+        status = 2,
+    ).count()
+
+    if hflocation and hflocation =="0" :
+        policy = Policy.objects.filter(
+            status = 2,
+            start_date__gte=date_from,
+            expiry_date__lte=date_to
+        ).count()
+   
+    dictBase["post"]= str(policy) 
     return dictBase
 def closed_cs_query(user, **kwargs):
     date_from = kwargs.get("date_from")

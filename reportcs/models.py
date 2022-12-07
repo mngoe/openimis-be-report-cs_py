@@ -521,6 +521,8 @@ def cs_in_use_query(user, **kwargs):
 
     policy = Policy.objects.values_list('status', flat=True).filter(
         id__in = list2,
+        start_date__gte=date_from,
+        expiry_date__lte=date_to,
         status = 2,
     ).count()
 

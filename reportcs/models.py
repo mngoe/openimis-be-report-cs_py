@@ -374,14 +374,14 @@ def mother_cpon_with_cs_query(user, **kwargs):
 
         service = Service.objects.values_list('code',flat=True).filter(
         id__in  = list3,    
-        # validity_from__gte = date_from,
-        # validity_to__lte = date_to,
+        validity_from__gte = date_from,
+        validity_to__lte = date_to,
         code = 'F8'
         ).count()
     if hflocation and hflocation =="0" :
             service = Service.objects.filter(
-            # validity_from__gte = date_from,
-            # validity_to__lte = date_to,
+            validity_from__gte = date_from,
+            validity_to__lte = date_to,
             code = 'F8'
         ).count()
     dictBase["post"]= str(service)

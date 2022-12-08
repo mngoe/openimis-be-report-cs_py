@@ -355,16 +355,36 @@ def mother_cpon_with_cs_query(user, **kwargs):
             validity_to__isnull=True
             ).first()
         dictBase["fosa"] = hflocationObj.name
+        dictGeo['health_facility'] = hflocationObj.id
 
-        claimItem = Service.objects.filter(
-        validity_from__gte = date_from,
-        validity_to__lte = date_to,
-        **dictGeo,
+        hf = HealthFacility.objects.values_list('id',flat=True).filter(
+            code=hflocation,
+            )
+        list5 = list(hf)
+
+        claim = Claim.objects.values_list('id').filter(
+            health_facility_id__in = list5
+        )
+        list2  = list(claim)
+
+        claimservice = ClaimService.objects.values_list('service_id',flat=True).filter(
+            claim_id__in = list2
+        )
+        list3 = list(claimservice)
+
+        service = Service.objects.values_list('code',flat=True).filter(
+        id__in  = list3,    
+        # validity_from__gte = date_from,
+        # validity_to__lte = date_to,
         code = 'F8'
         ).count()
-        dictGeo['health_facility'] = hflocationObj.id
-        dictBase["post"]= str(claimItem)
-        print(claimItem)
+    if hflocation and hflocation =="0" :
+            service = Service.objects.filter(
+            # validity_from__gte = date_from,
+            # validity_to__lte = date_to,
+            code = 'F8'
+        ).count()
+    dictBase["post"]= str(service)
     return dictBase
 
 def newborn_cpon_with_cs_query(date_from=None, date_to=None, **kwargs):
@@ -409,14 +429,14 @@ def invoice_per_fosa_query(user, **kwargs):
             validity_to__isnull=True
             ).first()
         dictBase["fosa"] = hflocationObj.name
-
+        dictGeo['health_facility'] = hflocationObj.id
     claimItem = Claim.objects.values_list('status').filter(
-        validity_from__gte = date_from,
-        validity_to__lte = date_to,
+        date_claimed__gte = date_from,
+        date_claimed__lte = date_to,
         **dictGeo
     ).count()
     
-    dictBase["post"]= str(claimItem)
+    dictBase["post"]= str(claimItem) 
     return dictBase
 
 def expired_policies_query(date_from=None, date_to=None, **kwargs):
@@ -487,14 +507,15 @@ def periodic_rejected_bills_query(user, **kwargs):
             ).first()
         dictBase["fosa"] = hflocationObj.name
 
-        claimItem = Claim.objects.filter(
+        dictGeo['health_facility'] = hflocationObj.id
+    claimItem = Claim.objects.values_list('status').filter(
         validity_from__gte = date_from,
         validity_to__lte = date_to,
         **dictGeo,
         status = 1
-        ).count()
-        dictGeo['health_facility'] = hflocationObj.id
-        dictBase["post"]= str(claimItem)
+    ).count()
+
+    dictBase["post"]= str(claimItem)
     return dictBase
 
 def periodic_household_participation_query(date_from=None, date_to=None, **kwargs):
@@ -513,7 +534,6 @@ def cs_in_use_query(user, **kwargs):
     date_from = kwargs.get("date_from")
     date_to = kwargs.get("date_to")
     hflocation = kwargs.get("hflocation")
-
     format = "%Y-%m-%d"
 
     date_from_object = datetime.datetime.strptime(date_from, format)
@@ -522,65 +542,70 @@ def cs_in_use_query(user, **kwargs):
     date_to_object = datetime.datetime.strptime(date_to, format)
     date_to_str = date_to_object.strftime("%d/%m/%Y")
 
-    policy1 = Policy.objects.filter(
+    
+    dictBase = {
+        "dateFrom": date_from_str,
+        "dateTo": date_to_str,
+        }
+    dictGeo = {}
+    if hflocation and hflocation!="0" :
+        hflocationObj = HealthFacility.objects.filter(
+            code=hflocation,
+            validity_to__isnull=True
+            ).first()
+        dictBase["fosa"] = hflocationObj.name
+
+        policy1 = Policy.objects.filter(
         validity_from__gte = date_from,
-        validity_to__gte = date_to,
-            status= 1
-        ).count()
-    policy2 = Policy.objects.filter(
-        validity_from__gte = date_from,
-        validity_to__gte = date_to,
+        validity_to__lte = date_to,
+        **dictGeo,
             status= 2
         ).count()
 
-    dictBase =  {
-        "dateFrom": date_from_str,
-        "dateTo": date_to_str,
-        "post": str(policy1 + policy2)
-        }
-
-    if hflocation and hflocation !="0":
-        hflocationObj = HealthFacility.objects.filter(
-            code = hflocation,
-            validity_to__isnull = True
-            ).first()
-        dictBase["fosa"] = hflocationObj.name
-    print(dictBase)
+        dictGeo['health_facility'] = hflocationObj.id
+        dictBase["post"]= str(policy1)
     return dictBase
 
 def closed_cs_query(user, **kwargs):
     date_from = kwargs.get("date_from")
     date_to = kwargs.get("date_to")
+    
     hflocation = kwargs.get("hflocation")
-
     format = "%Y-%m-%d"
+
     date_from_object = datetime.datetime.strptime(date_from, format)
     date_from_str = date_from_object.strftime("%d/%m/%Y")
-    
+
     date_to_object = datetime.datetime.strptime(date_to, format)
     date_to_str = date_to_object.strftime("%d/%m/%Y")
+
     
-    policyA = Policy.objects.filter(
-        validity_from__gte = date_from,
-        validity_to__lte = date_to,
-        status = 4
-        ).count()
-    policyB = Policy.objects.filter(
-        validity_from__gte = date_from,
-        validity_to__lte = date_to,
-        status = 8
-        ).count()
     dictBase = {
         "dateFrom": date_from_str,
         "dateTo": date_to_str,
-        "post": str(policyA+policyB)
-    }
-    if hflocation and hflocation !="0":
+        }
+    dictGeo = {}
+    if hflocation and hflocation!="0" :
         hflocationObj = HealthFacility.objects.filter(
-            code = hflocation,
-            validity_to__isnull = True
+            code=hflocation,
+            validity_to__isnull=True
             ).first()
         dictBase["fosa"] = hflocationObj.name
+
+        policyA = Policy.objects.filter(
+        validity_from__gte = date_from,
+        validity_to__lte = date_to,
+            **dictGeo,
+            status = 4,
+        ).count()
+        policyB = Policy.objects.filter(
+        validity_from__gte = date_from,
+        validity_to__lte = date_to,
+            **dictGeo,
+            status = 8,
+        ).count()
+        dictGeo['health_facility'] = hflocationObj.id
+        dictBase["post"]= str(policyA+policyB)
     return dictBase
 
 def severe_malaria_cost_query(date_from=None, date_to=None, **kwargs):

@@ -100,24 +100,25 @@ def invoice_cs_query(user, **kwargs):
             if claimServiceElmt.service.packagetype == "S":
                 invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"] += invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"]['all'] * invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["tarif"]
             else :
-                if claimServiceElmt.service.manualPrice == True :
-                    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"] += invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"]['all'] * claimServiceElmt.service.price
-                else :
-                    claimSs = ClaimServiceService.objects.filter(
-                        claimlinkedService = claimServiceElmt
-                    )
-                    tarifLocal = 0
-                    for claimSsElement in claimSs:
-                        tarifLocal += claimSsElement.qty_displayed * claimSsElement.price_asked
-                    #    print(tarifLocal)
-                    claimSi = ClaimServiceItem.objects.filter(
-                        claimlinkedItem = claimServiceElmt
-                    )
-                    for claimSiElement in claimSi:
-                        tarifLocal += claimSiElement.qty_displayed * claimSiElement.price_asked
-                        #print(tarifLocal)
-                    #print(type(tarifLocal))
-                    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"] += tarifLocal
+                # Desactivation du controle sur ManualPrice
+                #if claimServiceElmt.service.manualPrice == True :
+                #    invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"] += invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["qty"]['all'] * claimServiceElmt.service.price
+                #else :
+                claimSs = ClaimServiceService.objects.filter(
+                    claimlinkedService = claimServiceElmt
+                )
+                tarifLocal = 0
+                for claimSsElement in claimSs:
+                    tarifLocal += claimSsElement.qty_displayed * claimSsElement.price_asked
+                #    print(tarifLocal)
+                claimSi = ClaimServiceItem.objects.filter(
+                    claimlinkedItem = claimServiceElmt
+                )
+                for claimSiElement in claimSi:
+                    tarifLocal += claimSiElement.qty_displayed * claimSiElement.price_asked
+                    #print(tarifLocal)
+                #print(type(tarifLocal))
+                invoiceElemtList[claimServiceElmt.service.packagetype][claimServiceElmt.service.id]["MontantRecue"] += tarifLocal
 
 
             if claimServiceElmt.service.packagetype not in invoiceElemtTotal :

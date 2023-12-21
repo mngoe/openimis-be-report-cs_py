@@ -72,7 +72,7 @@ def invoice_cs_query(user, **kwargs):
         claimService = ClaimService.objects.filter(
             claim = cclaim,
             status=1
-        )
+        ).filter(validity_to__isnull=True)
         for claimServiceElmt in claimService:
             invoiceElemtTotal[claimServiceElmt.service.packagetype+"QtyValuatedV"] = 0
             invoiceElemtTotal[claimServiceElmt.service.packagetype+"MtnValideV"] = 0
@@ -136,7 +136,7 @@ def invoice_cs_query(user, **kwargs):
         claimItem = ClaimItem.objects.filter(
             claim = cclaim,
             status=1
-        )
+        ).filter(validity_to__isnull=True)
         for claimItemElmt in claimItem:
             if claimItemElmt.service.id not in invoiceElemtList[claimItemElmt.service.packagetype]:
                 invoiceElemtList[claimItemElmt.service.packagetype][claimItemElmt.service.id] = defaultdict(int)
